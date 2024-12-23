@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeu des Films</title>
+</head>
+
+<body>
+  <main>
+    <h2>Score : <span id="score">{{ score }}</span></h2>
+    <h2>{{ movieSelected.emojis }}</h2>
+    <form action="/movies/check" method="POST">
+      {{ csrfField() }}
+      <div>
+        <label for="user_answer">Votre réponse :</label>
+        <input type="text" id="user_answer" name="user_answer" required />
+      </div>
+      <button type="submit">Valider</button>
+    </form>
+    <p>{{ message }}</p>
+  </main>
+</body>
+
+</html>
