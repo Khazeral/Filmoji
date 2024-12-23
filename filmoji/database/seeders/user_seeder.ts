@@ -3,12 +3,11 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
 export default class UserSeeder extends BaseSeeder {
   public async run() {
-    // Créez un ensemble d'utilisateurs de démonstration
     await User.createMany([
       {
         fullName: 'Alice Dupont',
         email: 'alice@example.com',
-        password: 'password123', // Assurez-vous que votre modèle gère le hachage
+        password: 'password123',
         score: 10,
       },
       {

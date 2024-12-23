@@ -1,74 +1,172 @@
 import Movie from '#models/movie'
 import { HttpContext } from '@adonisjs/core/http'
-import { randomPick } from '../utils/random_pick.js'
 import { getLevenshteinDistance } from '../utils/levenshtein_distance.js'
-import UsersController from './users_controller.js'
 import MoviesFound from '#models/movies_found'
-import logger from '@adonisjs/core/services/logger'
+import User from '#models/user'
 
 export default class MovieController {
-  public async initializeGame({ view, session }: HttpContext) {
+  public async initializeGame({ view, session, request, auth }: HttpContext) {
     let user = session.get('user')
+    let isAuthenticated = false
 
-    if (!user) {
-      user = { id: `anon_${Math.random().toString(36).substr(2, 9)}`, score: 0 }
+    const userIdFromCookie = request.cookie('user_id')
+
+    if (userIdFromCookie) {
+      const userFromDb = await User.find(userIdFromCookie)
+
+      if (userFromDb) {
+        await auth.use('web').login(userFromDb)
+        user = { id: userFromDb.id, score: userFromDb.score }
+        isAuthenticated = true
+      }
+    }
+
+    if (!user || user.id === -1) {
+      user = { id: -1, score: 0 }
       session.put('user', user)
     }
 
-    const movies = await Movie.all()
-    const randomMovieIndex = randomPick(movies.length)
+    const resolvedMovies =
+      user.id !== -1 ? await MoviesFound.query().where('user_id', user.id).select('movie_id') : []
+
+    const resolvedMovieIds = resolvedMovies.map((movie) => movie.movieId)
+    const movies = await Movie.query().whereNotIn('id', resolvedMovieIds)
+
+    if (movies.length === 0) {
+      return view.render('end_game', { message: 'Vous avez résolu tous les films ! 🎉' })
+    }
+
+    const randomMovieIndex = Math.floor(Math.random() * movies.length)
     const movieSelected = movies[randomMovieIndex]
     session.put('movieSelected', movieSelected)
 
     return view.render('game', {
+      isAuthenticated: isAuthenticated,
       movieSelected: movieSelected,
       score: user.score,
     })
   }
 
-  public async checkAnswer({ request, response, session, view }: HttpContext) {
+  public async checkAnswer({ request, response, session, view, auth }: HttpContext) {
+    let isAuthenticated = false
+    let user = session.get('user')
+    const userIdFromCookie = request.cookie('user_id')
+
+    if (userIdFromCookie) {
+      const userFromDb = await User.find(userIdFromCookie)
+
+      if (userFromDb) {
+        await auth.use('web').login(userFromDb)
+        user = { id: userFromDb.id, score: userFromDb.score }
+        isAuthenticated = true
+      }
+    }
+
+    if (!user || user.id === -1) {
+      user = { id: -1, score: 0 }
+      session.put('user', user)
+    }
+
     const movieSelected = session.get('movieSelected')
-    const usersController = new UsersController()
     const userAnswer = request.input('user_answer')
 
-    const movie = await Movie.findBy('id', movieSelected.id)
+    const movie = await Movie.find(movieSelected.id)
     if (!movie) {
       return response.status(404).send({ error: 'Film non trouvé' })
     }
 
     const distance = getLevenshteinDistance(userAnswer.toLowerCase(), movie.name.toLowerCase())
     const isCorrect = distance <= 3
-    let user = session.get('user')
 
     if (isCorrect) {
-      usersController.incrementUserScore(user.id)
+      await this.handleCorrectAnswer(user, movie, session)
+    }
 
-      logger.info(user.id)
-      logger.info(movie.id)
+    const nextMovie = await this.getNextMovie(user, session)
+    if (!nextMovie) {
+      return view.render('end_game', {
+        message: 'Vous avez résolu tous les films ! 🎉',
+        score: user.score,
+      })
+    }
+
+    if (isCorrect) {
+      session.put('movieSelected', nextMovie)
+    }
+
+    return view.render('game', {
+      isAuthenticated: isAuthenticated,
+      movieSelected: session.get('movieSelected'),
+      score: user.score,
+      correctAnswer: movie.name,
+    })
+  }
+
+  private async handleCorrectAnswer(user, movie, session) {
+    user.score += 1
+
+    if (user.id === -1) {
+      const moviesFound = session.get('MovieFound') || []
+      session.put('MovieFound', [...moviesFound, movie.id])
+    } else {
       await MoviesFound.create({
         userId: user.id,
         movieId: movie.id,
       })
+
+      const dbUser = await User.find(user.id)
+      if (dbUser) {
+        dbUser.score = user.score
+        await dbUser.save()
+      }
     }
 
-    const moviesFound = await MoviesFound.query().where('user_id', user.id).select('movie_id')
-    const moviesFoundIds = moviesFound.map((mf) => mf.movieId)
+    this.updateSessionUser(session, user)
+  }
 
-    const movies = await Movie.query().whereNotIn('id', moviesFoundIds)
+  private async getNextMovie(user, session) {
+    let movies
+
+    if (user.id === -1) {
+      const moviesFound = session.get('MovieFound') || []
+      movies = await Movie.query().whereNotIn('id', moviesFound)
+    } else {
+      const moviesFound = await MoviesFound.query().where('user_id', user.id).select('movie_id')
+      const movieIds = moviesFound.map((mf) => mf.movieId)
+      movies = await Movie.query().whereNotIn('id', movieIds)
+    }
 
     if (movies.length === 0) {
-      return response.redirect('/end-page')
+      return null
     }
 
-    const randomMovieIndex = randomPick(movies.length)
-    const newMovieSelected = movies[randomMovieIndex]
-    session.put('movieSelected', newMovieSelected)
+    const randomIndex = Math.floor(Math.random() * movies.length)
+    return movies[randomIndex]
+  }
 
-    return view.render('game', {
-      movieSelected: newMovieSelected,
-      score: user.score,
-      message: isCorrect ? 'Bonne réponse ! 🎉' : 'Mauvaise réponse 😞',
-      correctAnswer: movie.name,
-    })
+  public async restartGame({ session, response }: HttpContext) {
+    const user = session.get('user')
+
+    if (user) {
+      if (user.id !== -1) {
+        await MoviesFound.query().where('user_id', user.id).delete()
+
+        const userToUpdate = await User.find(user.id)
+        if (userToUpdate) {
+          userToUpdate.score = 0
+          await userToUpdate.save()
+        }
+      }
+
+      session.put('user', { ...user, score: 0 })
+      session.forget('movieSelected')
+      session.forget('MovieFound')
+    }
+
+    return response.redirect('/game')
+  }
+
+  private updateSessionUser(session, user) {
+    session.put('user', { id: user.id, score: user.score })
   }
 }

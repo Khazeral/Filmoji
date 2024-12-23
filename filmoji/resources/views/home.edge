@@ -1,0 +1,31 @@
+<!-- resources/views/home.edge -->
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil</title>
+  <link rel="stylesheet" href="/css/app.css"> <!-- Assurez-vous que vous avez une feuille de style -->
+</head>
+
+<body>
+  <header>
+    <h1>Bienvenue dans le Jeu de Films</h1>
+  </header>
+
+  <main>
+    <p>Commencez une nouvelle partie ou reprenez une partie précédente.</p>
+
+    <form action="/game" method="GET">
+      <button type="submit">Commencer une nouvelle partie</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Jeu de Films</p>
+  </footer>
+</body>
+
+</html>

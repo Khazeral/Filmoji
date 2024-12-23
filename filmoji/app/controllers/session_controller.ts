@@ -1,19 +1,18 @@
 import User from '#models/user'
 import { HttpContext } from '@adonisjs/core/http'
-import logger from '@adonisjs/core/services/logger'
 
 export default class SessionController {
   async login({ request, auth, response, session }: HttpContext) {
     const { email, password } = request.only(['email', 'password'])
     const user = await User.verifyCredentials(email, password)
     await auth.use('web').login(user)
-    logger.info(user)
+    response.cookie('user_id', user.id, { httpOnly: true, maxAge: '1d' })
     session.put('user', {
       id: user.id,
       email: user.email,
       score: user.score,
     })
-    response.redirect('/')
+    response.redirect('/game')
   }
 
   public async register({ request, auth, response, session }: HttpContext) {
@@ -29,14 +28,23 @@ export default class SessionController {
       password,
     })
 
-    const userData = await User.findBy('id', user.id)
     await auth.use('web').login(user)
+    const datasBeforeRegister = session.get('user')
     session.put('user', {
       id: user.id,
       email: user.email,
-      score: userData!.score ?? 0,
+      score: datasBeforeRegister.score ?? 0,
     })
 
+    if (datasBeforeRegister.score > 0) {
+      response.redirect('/game')
+    } else {
+      response.redirect('/')
+    }
+  }
+
+  public async logout({ session, response }: HttpContext) {
+    session.forget('user')
     response.redirect('/')
   }
 }
