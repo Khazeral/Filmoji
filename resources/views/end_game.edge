@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fin du jeu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #4caf50;
+    }
+
+    .score {
+      font-size: 2rem;
+      margin: 1rem 0;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Bravo ! 🎉</h1>
+  <p>Vous avez deviné tous les films disponibles !</p>
+  <p class="score">Score final : <span>{{ score }}</span></p>
+
+  <form action="/game/restart" method="POST">
+    {{ csrfField() }}
+    <button type="submit">Recommencer une partie</button>
+  </form>
+
+  <a href="/">
+    <button style="margin-top: 1rem;">Retour à l'accueil</button>
+  </a>
+</body>
+
+</html>
