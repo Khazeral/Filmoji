@@ -12,43 +12,28 @@ const userController = new UsersController()
 export default class MovieController {
   public async initializeGame({ view, session, request }: HttpContext) {
     const { userData, isAuthenticated } = await userController.getUser(session, request)
-    if (isAuthenticated) {
-      const movie = await this.getNextMovie(userData, session)
-      if (movie === null) {
-        return view.render('end_game', {
-          message: 'Vous avez résolu tous les films ! 🎉',
-          score: userData.score,
-        })
-      }
 
-      return view.render('game', {
-        isAuthenticated: isAuthenticated,
-        movieSelected: movie,
-        score: userData.score,
-      })
-    } else {
-      if (userData.id === USER_NOT_REGISTRED_ID) {
-        const anonymousUser = { id: USER_NOT_REGISTRED_ID, score: 0 }
-        session.put('user', anonymousUser)
-      }
+    if (!isAuthenticated && userData.id === USER_NOT_REGISTRED_ID) {
+      const anonymousUser = { id: USER_NOT_REGISTRED_ID, score: 0 }
+      session.put('user', anonymousUser)
+    }
 
-      const movie = await this.getNextMovie(userData, session)
+    const movie = await this.getNextMovie(userData, session)
 
-      if (movie === null) {
-        return view.render('end_game', {
-          message: 'Vous avez résolu tous les films ! 🎉',
-          score: userData.score,
-        })
-      }
-
-      session.put('movieSelected', movie)
-
-      return view.render('game', {
-        isAuthenticated: isAuthenticated,
-        movieSelected: movie,
+    if (!movie) {
+      return view.render('end_game', {
+        message: 'Vous avez résolu tous les films ! 🎉',
         score: userData.score,
       })
     }
+
+    session.put('movieSelected', movie)
+
+    return view.render('game', {
+      isAuthenticated,
+      movieSelected: movie,
+      score: userData.score,
+    })
   }
 
   public async checkAnswer({ request, response, session, view }: HttpContext) {
