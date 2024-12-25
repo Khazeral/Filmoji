@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import MoviesFound from './movies_found.js'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
+import SelectedMovie from './selected_movie.js'
 
 export default class Movie extends BaseModel {
   @column({ isPrimary: true })
@@ -21,4 +22,7 @@ export default class Movie extends BaseModel {
 
   @hasMany(() => MoviesFound)
   declare moviesFound: HasMany<typeof MoviesFound>
+
+  @hasMany(() => SelectedMovie)
+  declare selectedMovies: HasMany<typeof SelectedMovie>
 }

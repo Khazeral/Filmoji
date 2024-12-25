@@ -11,19 +11,14 @@ router.get('/', async ({ view }) => {
 
 router.post('/movies/check', [MovieController, 'checkAnswer'])
 
-router.get('/login-page', async ({ view }) => {
+router.post('/login', [SessionController, 'login'])
+router.get('/login', async ({ view }) => {
   return view.render('login')
 })
 
-router.post('/login', [SessionController, 'login'])
 router.post('/register', [SessionController, 'register'])
-router.get('/logout', [SessionController, 'logout']).use(middleware.auth())
-router.get('/register-page', async ({ view }) => {
+router.get('/register', async ({ view }) => {
   return view.render('register')
 })
 
-router.post('/game/restart', [MovieController, 'restartGame'])
-
-router.get('/end-page', async ({ view }) => {
-  return view.render('end_game')
-})
+router.get('/logout', [SessionController, 'logout']).use(middleware.auth())

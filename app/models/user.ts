@@ -1,10 +1,11 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import MoviesFounds from './movies_found.js'
+import SelectedMovie from './selected_movie.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -35,4 +36,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => MoviesFounds)
   declare moviesFounds: HasMany<typeof MoviesFounds>
+
+  @hasOne(() => SelectedMovie)
+  declare selectedMovie: HasOne<typeof SelectedMovie>
 }

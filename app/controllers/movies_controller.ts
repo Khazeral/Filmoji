@@ -3,70 +3,56 @@ import { HttpContext } from '@adonisjs/core/http'
 import { getLevenshteinDistance } from '../utils/levenshtein_distance.js'
 import MoviesFound from '#models/movies_found'
 import User from '#models/user'
+import UsersController, { AnonymousUser, AuthenticatedUser } from './users_controller.js'
+import { Session } from '@adonisjs/session'
+
+const USER_NOT_REGISTRED_ID = -1
+const userController = new UsersController()
 
 export default class MovieController {
-  public async initializeGame({ view, session, request, auth }: HttpContext) {
-    let user = session.get('user')
-    let isAuthenticated = false
-
-    const userIdFromCookie = request.cookie('user_id')
-
-    if (userIdFromCookie) {
-      const userFromDb = await User.find(userIdFromCookie)
-
-      if (userFromDb) {
-        await auth.use('web').login(userFromDb)
-        user = { id: userFromDb.id, score: userFromDb.score }
-        isAuthenticated = true
+  public async initializeGame({ view, session, request }: HttpContext) {
+    const { userData, isAuthenticated } = await userController.getUser(session, request)
+    if (isAuthenticated) {
+      const movie = await this.getNextMovie(userData, session)
+      if (movie === null) {
+        return view.render('end_game', {
+          message: 'Vous avez résolu tous les films ! 🎉',
+          score: userData.score,
+        })
       }
+
+      return view.render('game', {
+        isAuthenticated: isAuthenticated,
+        movieSelected: movie,
+        score: userData.score,
+      })
+    } else {
+      if (userData.id === USER_NOT_REGISTRED_ID) {
+        const anonymousUser = { id: USER_NOT_REGISTRED_ID, score: 0 }
+        session.put('user', anonymousUser)
+      }
+
+      const movie = await this.getNextMovie(userData, session)
+
+      if (movie === null) {
+        return view.render('end_game', {
+          message: 'Vous avez résolu tous les films ! 🎉',
+          score: userData.score,
+        })
+      }
+
+      session.put('movieSelected', movie)
+
+      return view.render('game', {
+        isAuthenticated: isAuthenticated,
+        movieSelected: movie,
+        score: userData.score,
+      })
     }
-
-    if (!user || user.id === -1) {
-      user = { id: -1, score: 0 }
-      session.put('user', user)
-    }
-
-    const resolvedMovies =
-      user.id !== -1 ? await MoviesFound.query().where('user_id', user.id).select('movie_id') : []
-
-    const resolvedMovieIds = resolvedMovies.map((movie) => movie.movieId)
-    const movies = await Movie.query().whereNotIn('id', resolvedMovieIds)
-
-    if (movies.length === 0) {
-      return view.render('end_game', { message: 'Vous avez résolu tous les films ! 🎉' })
-    }
-
-    const randomMovieIndex = Math.floor(Math.random() * movies.length)
-    const movieSelected = movies[randomMovieIndex]
-    session.put('movieSelected', movieSelected)
-
-    return view.render('game', {
-      isAuthenticated: isAuthenticated,
-      movieSelected: movieSelected,
-      score: user.score,
-    })
   }
 
-  public async checkAnswer({ request, response, session, view, auth }: HttpContext) {
-    let isAuthenticated = false
-    let user = session.get('user')
-    const userIdFromCookie = request.cookie('user_id')
-
-    if (userIdFromCookie) {
-      const userFromDb = await User.find(userIdFromCookie)
-
-      if (userFromDb) {
-        await auth.use('web').login(userFromDb)
-        user = { id: userFromDb.id, score: userFromDb.score }
-        isAuthenticated = true
-      }
-    }
-
-    if (!user || user.id === -1) {
-      user = { id: -1, score: 0 }
-      session.put('user', user)
-    }
-
+  public async checkAnswer({ request, response, session, view }: HttpContext) {
+    const user = await userController.getUser(session, request)
     const movieSelected = session.get('movieSelected')
     const userAnswer = request.input('user_answer')
 
@@ -86,7 +72,7 @@ export default class MovieController {
     if (!nextMovie) {
       return view.render('end_game', {
         message: 'Vous avez résolu tous les films ! 🎉',
-        score: user.score,
+        score: user.userData.score,
       })
     }
 
@@ -95,78 +81,67 @@ export default class MovieController {
     }
 
     return view.render('game', {
-      isAuthenticated: isAuthenticated,
       movieSelected: session.get('movieSelected'),
-      score: user.score,
+      score: user.userData.score,
       correctAnswer: movie.name,
     })
   }
 
-  private async handleCorrectAnswer(user, movie, session) {
-    user.score += 1
-
-    if (user.id === -1) {
-      const moviesFound = session.get('MovieFound') || []
-      session.put('MovieFound', [...moviesFound, movie.id])
-    } else {
+  private async handleCorrectAnswer(
+    user: AuthenticatedUser | AnonymousUser,
+    movie: Movie,
+    session: Session
+  ) {
+    const { userData, isAuthenticated } = user
+    if (isAuthenticated && userData instanceof User) {
       await MoviesFound.create({
-        userId: user.id,
+        userId: userData.id,
         movieId: movie.id,
       })
-
-      const dbUser = await User.find(user.id)
-      if (dbUser) {
-        dbUser.score = user.score
-        await dbUser.save()
-      }
+      userData.score += 1
+      await userData.save()
+    } else {
+      const moviesFound = session.get('MovieFound') || []
+      session.put('MovieFound', [...moviesFound, movie.id])
+      userData.score += 1
+      session.put('user', userData)
     }
-
-    this.updateSessionUser(session, user)
   }
 
-  private async getNextMovie(user, session) {
+  private async getNextMovie(user: AuthenticatedUser | AnonymousUser, session: Session) {
     let movies
 
-    if (user.id === -1) {
-      const moviesFound = session.get('MovieFound') || []
-      movies = await Movie.query().whereNotIn('id', moviesFound)
-    } else {
-      const moviesFound = await MoviesFound.query().where('user_id', user.id).select('movie_id')
+    if (user.isAuthenticated) {
+      const moviesFound = await MoviesFound.query()
+        .where('user_id', user.userData.id)
+        .select('movie_id')
       const movieIds = moviesFound.map((mf) => mf.movieId)
       movies = await Movie.query().whereNotIn('id', movieIds)
+    } else {
+      const moviesFound = session.get('MovieFound') || []
+      movies = await Movie.query().whereNotIn('id', moviesFound)
     }
-
     if (movies.length === 0) {
       return null
     }
-
     const randomIndex = Math.floor(Math.random() * movies.length)
     return movies[randomIndex]
   }
 
-  public async restartGame({ session, response }: HttpContext) {
-    const user = session.get('user')
+  public async restartGame({ session, response, request }: HttpContext) {
+    const { userData, isAuthenticated } = await userController.getUser(session, request)
 
-    if (user) {
-      if (user.id !== -1) {
-        await MoviesFound.query().where('user_id', user.id).delete()
+    if (isAuthenticated) {
+      await MoviesFound.query().where('user_id', userData.id).delete()
 
-        const userToUpdate = await User.find(user.id)
-        if (userToUpdate) {
-          userToUpdate.score = 0
-          await userToUpdate.save()
-        }
-      }
-
-      session.put('user', { ...user, score: 0 })
+      userData.score = 0
+      await userData.save()
+    } else {
+      session.put('user', { ...userData, score: 0 })
       session.forget('movieSelected')
       session.forget('MovieFound')
     }
 
     return response.redirect('/game')
-  }
-
-  private updateSessionUser(session, user) {
-    session.put('user', { id: user.id, score: user.score })
   }
 }
