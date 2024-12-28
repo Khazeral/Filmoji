@@ -31,21 +31,6 @@
       position: relative;
     }
 
-    /* Bouton retour */
-    .back-button {
-      position: absolute;
-      top: -15px;
-      left: -15px;
-      background-color: #ff5722;
-      color: #fff;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      text-decoration: none;
-    }
 
     .back-button:hover {
       background-color: #e64a19;
@@ -130,17 +115,31 @@
     p a:hover {
       text-decoration: underline;
     }
+
+    .back-button {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .back-button a {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background-color: #6c757d;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
   </style>
 </head>
 
 <body>
   <div class="container">
-    <!-- Bouton de retour -->
-    <a href="/game" class="back-button">Retour au jeu</a>
 
     <h1>Connexion</h1>
 
-    <!-- Affichage des erreurs -->
     <div id="error-message">
       {{errorMessage ? errorMessage : ''}}
     </div>
@@ -159,6 +158,9 @@
     </form>
 
     <p>Pas encore inscrit ? <a href="/register">Créer un compte</a></p>
+    <div class="back-button">
+      <a href="/game">Revenir au jeu</a>
+    </div>
   </div>
 </body>
 

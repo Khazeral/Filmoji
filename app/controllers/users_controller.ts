@@ -21,7 +21,7 @@ export default class UsersController {
   public async getUser(
     session: Session,
     request: Request
-  ): Promise<{ userData: any; isAuthenticated: boolean }> {
+  ): Promise<{ userData: User; isAuthenticated: boolean }> {
     const userIdFromCookie = request.cookie('user_id')
     if (userIdFromCookie) {
       const userFromDb = await User.find(userIdFromCookie)

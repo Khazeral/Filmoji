@@ -5,6 +5,7 @@ export default class SessionController {
   async login({ request, auth, response }: HttpContext) {
     const { email, password } = request.only(['email', 'password'])
     const user = await User.verifyCredentials(email, password)
+    response.cookie('user_id', user.id, { httpOnly: true, secure: true })
     await auth.use('web').login(user)
     response.redirect('/game')
   }
@@ -26,6 +27,7 @@ export default class SessionController {
     })
 
     await auth.use('web').login(user)
+    response.cookie('user_id', user.id, { httpOnly: true, secure: true })
     if (datasBeforeRegister.score > 0) {
       response.redirect('/game')
     } else {
