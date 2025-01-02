@@ -1,28 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register</title>
+  <title>Inscription</title>
+  <style>
+    /* Styles de base */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    /* Conteneur principal */
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    /* Titre */
+    h1 {
+      margin-bottom: 1.5rem;
+      color: #007bff;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      width: auto;
+    }
+
+    label {
+      font-weight: bold;
+      text-align: left;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      display: flex;
+      flex-direction: column;
+      row-gap: 4px;
+      width: auto;
+    }
+
+    input {
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      width: 93%;
+    }
+
+    input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    button {
+      padding: 0.8rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Lien de connexion */
+    p {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    p a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    p a:hover {
+      text-decoration: underline;
+    }
+
+    /* Bouton de retour */
+    .back-button {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .back-button a {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background-color: #6c757d;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button a:hover {
+      background-color: #5a6268;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Page d'inscription</h1>
-  <form action="/register" method="POST">
-    {{ csrfField() }}
-    <label for="name">Nom :</label>
-    <input type="text" id="name" name="name" required>
-    <br>
-    <label for="email">Email :</label>
-    <input type="email" id="email" name="email" required>
-    <br>
-    <label for="password">Mot de passe :</label>
-    <input type="password" id="password" name="password" required>
-    <br>
-    <button type="submit">S'inscrire</button>
-  </form>
-  <p>Déjà un compte ? <a href="/login-page">Se connecter</a></p>
+  <div class="container">
+    <h1>Inscription</h1>
+    <form action="/register" method="POST">
+      {{ csrfField() }}
+      <div class="form-input">
+        <label for="name">Nom :</label>
+        <input type="text" id="name" name="name" placeholder="Entrez votre nom" required>
+      </div>
+      <div class="form-input">
+        <label for="email">Email :</label>
+        <input type="email" id="email" name="email" placeholder="Entrez votre email" required>
+      </div>
+      <div class="form-input">
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" placeholder="Choisissez un mot de passe" required>
+      </div>
+      <button type="submit">S'inscrire</button>
+    </form>
+    <p>Déjà un compte ? <a href="/login">Se connecter</a></p>
+    <div class="back-button">
+      <a href="/game">Revenir au jeu</a>
+    </div>
+  </div>
 </body>
 
 </html>

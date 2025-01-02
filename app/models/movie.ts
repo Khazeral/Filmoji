@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
-import MoviesFound from './movies_found.js'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
+import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import User from './user.js'
 
 export default class Movie extends BaseModel {
   @column({ isPrimary: true })
@@ -19,6 +19,9 @@ export default class Movie extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @hasMany(() => MoviesFound)
-  declare moviesFound: HasMany<typeof MoviesFound>
+  @manyToMany(() => User, {
+    pivotTable: 'user_movies',
+    pivotColumns: ['been_found', 'is_target'],
+  })
+  declare userMovies: ManyToMany<typeof User>
 }

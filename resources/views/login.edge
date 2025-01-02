@@ -5,30 +5,163 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion</title>
+  <style>
+    /* Styles de base */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    /* Conteneur principal */
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+
+    .back-button:hover {
+      background-color: #e64a19;
+    }
+
+    /* Titre */
+    h1 {
+      margin-bottom: 1.5rem;
+      color: #4caf50;
+    }
+
+    /* Messages d'erreur */
+    #error-message {
+      color: red;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Formulaire */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    label {
+      font-weight: bold;
+      text-align: left;
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .form-input {
+      display: flex;
+      flex-direction: column;
+      row-gap: 4px;
+      width: auto;
+    }
+
+    input {
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      width: 93%;
+    }
+
+    input:focus {
+      border-color: #4caf50;
+      outline: none;
+    }
+
+    /* Bouton */
+    button {
+      padding: 0.8rem;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #3e8e41;
+    }
+
+    /* Lien d'inscription */
+    p {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    p a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    p a:hover {
+      text-decoration: underline;
+    }
+
+    .back-button {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .back-button a {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background-color: #6c757d;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+  </style>
 </head>
 
 <body>
-  <h1>Connexion</h1>
+  <div class="container">
 
-  <!-- Affichage des erreurs -->
-  <div id="error-message" style="color: red;">
-    {{errorMessage ? errorMessage : ''}}
+    <h1>Connexion</h1>
+
+    <div id="error-message">
+      {{errorMessage ? errorMessage : ''}}
+    </div>
+
+    <form action="/login" method="POST">
+      {{ csrfField() }}
+      <div class="form-input">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" placeholder="Entrez votre email" required />
+      </div>
+      <div class="form-input">
+        <label for="password">Mot de passe</label>
+        <input type="password" name="password" id="password" placeholder="Entrez votre mot de passe" required />
+      </div>
+      <button type="submit">Se connecter</button>
+    </form>
+
+    <p>Pas encore inscrit ? <a href="/register">Créer un compte</a></p>
+    <div class="back-button">
+      <a href="/game">Revenir au jeu</a>
+    </div>
   </div>
-
-  <form action="/login" method="POST">
-    {{ csrfField() }}
-    <div>
-      <label for="email">Email</label>
-      <input type="email" name="email" id="email" required />
-    </div>
-    <div>
-      <label for="password">Mot de passe</label>
-      <input type="password" name="password" id="password" required />
-    </div>
-    <button type="submit">Se connecter</button>
-  </form>
-
-  <p>Pas encore inscrit ? <a href="/register-page">Créer un compte</a></p>
 </body>
 
 </html>
