@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accueil</title>
   <style>
-    /* Style général */
     body {
       font-family: 'Arial', sans-serif;
       margin: 0;
@@ -21,7 +20,6 @@
       text-align: center;
     }
 
-    /* En-tête */
     header {
       background-color: #4caf50;
       color: white;
@@ -36,7 +34,6 @@
       font-size: 2rem;
     }
 
-    /* Section principale */
     main {
       background: #fff;
       padding: 2rem;
@@ -52,7 +49,6 @@
       color: #555;
     }
 
-    /* Règles du jeu */
     .rules {
       background-color: #f0f8ff;
       border-left: 5px solid #4caf50;
@@ -68,7 +64,10 @@
       color: #4caf50;
     }
 
-    /* Bouton */
+    form {
+      margin-bottom: 1rem;
+    }
+
     button {
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
@@ -84,7 +83,6 @@
       background-color: #0056b3;
     }
 
-    /* Pied de page */
     footer {
       margin-top: 2rem;
       font-size: 0.9rem;
@@ -94,12 +92,9 @@
 </head>
 
 <body>
-  <!-- En-tête -->
   <header>
     <h1>Bienvenue dans Filmoji</h1>
   </header>
-
-  <!-- Section principale -->
   <main>
     <div class="rules">
       <h2>Règles du jeu</h2>
@@ -110,14 +105,22 @@
       </p>
     </div>
 
-    <p>Prêt(e) à relever le défi ? Commencez une nouvelle partie ou reprenez là où vous vous êtes arrêté(e) !</p>
+    <p>Prêt(e) à relever le défi ?</p>
 
-    <form action="/game" method="GET">
-      <button type="submit">Commencer une nouvelle partie</button>
-    </form>
+    @if (isAuthenticated)
+      <form action="/game" method="GET">
+        <button type="submit">Continuer ma partie</button>
+      </form>
+      <form action="/restart" method="GET">
+        <button type="submit">Recommencer une partie</button>
+      </form>
+    @else
+      <form action="/game" method="GET">
+        <button type="submit">Commencer une nouvelle partie</button>
+      </form>
+    @end
   </main>
 
-  <!-- Pied de page -->
   <footer>
     <p>&copy; 2024 Jeu de Films. Tous droits réservés.</p>
   </footer>

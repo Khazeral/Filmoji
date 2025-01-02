@@ -85,7 +85,7 @@
     <p>Vous avez deviné tous les films disponibles !</p>
     <p class="score">Score final : <span>{{ score }}</span></p>
 
-    <form action="/game/restart" method="POST">
+    <form action="/restart" method="GET">
       {{ csrfField() }}
       <button type="submit">Recommencer une partie</button>
     </form>

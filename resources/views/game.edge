@@ -1,126 +1,153 @@
 <!DOCTYPE html>
 <html lang="fr">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jeu des Films</title>
-  <style>
-    /* Style général */
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Jeu des Films
+    </title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+      }
 
-    /* Boutons de connexion/déconnexion */
-    .auth-button {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      padding: 0.75rem 1.5rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
+      .header-buttons {
+        width: 85%;
+        padding: 32px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
 
-    .auth-button:hover {
-      background-color: #0056b3;
-    }
+      .header-buttons a {
+        padding: 0.75rem 1.5rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
 
-    /* Conteneur principal */
-    main {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      width: 90%;
-      max-width: 500px;
-    }
+      .header-buttons a:hover {
+        background-color: #0056b3;
+      }
 
-    h2 {
-      margin: 1rem 0;
-    }
+      #game-container{
+        display: flex;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+      }
 
-    #score {
-      font-weight: bold;
-      color: #4caf50;
-    }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 16px;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+      }
 
-    /* Formulaire */
-    form {
-      margin-top: 1.5rem;
-    }
+      h2 {
+        margin: 1rem 0;
+      }
 
-    form div {
-      margin-bottom: 1rem;
-    }
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
 
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
-    }
+      #score {
+        font-weight: bold;
+        color: #4caf50;
+      }
 
-    input[type="text"] {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
 
-    button[type="submit"] {
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      color: #fff;
-      background-color: #007bff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+      #input-zone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-    button[type="submit"]:hover {
-      background-color: #0056b3;
-    }
-  </style>
-</head>
+      input[type="text"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+        min-width: 300px;
+      }
 
-<body>
-  <!-- Bouton de connexion/déconnexion -->
-  @if (isAuthenticated)
-  <a href="/logout" class="auth-button">Se déconnecter</a>
-  @else
-  <a href="/login" class="auth-button">Se connecter</a>
-  @end
+      button[type="submit"] {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
 
-  <!-- Conteneur principal -->
-  <main>
-    <h2>Score : <span id="score">{{ score }}</span></h2>
-    <h2>{{ movieSelected.emojis }}</h2>
-    <form action="/movies/check" method="POST">
-      {{ csrfField() }}
-      <div>
-        <label for="user_answer">Votre réponse :</label>
-        <input type="text" id="user_answer" name="user_answer" placeholder="Entrez votre réponse" required />
-      </div>
-      <button type="submit">Valider</button>
-    </form>
-  </main>
-</body>
+      button[type="submit"]:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header-buttons">
+      <a href="/">Accueil</a>
+      @if (isAuthenticated)
+        <a href="/logout">Se déconnecter</a>
+      @else
+        <a href="/login">Se connecter</a>
+      @end
+    </div>
+
+    <div id="game-container">
+      <main>
+        <h2>
+          Score : <span id="score">{{ score }}</span>
+        </h2>
+        <h1>
+          {{ movieSelected.emojis }}
+        </h1>
+        <form action="/movies/check" method="POST">
+          {{ csrfField() }}
+          <div id="input-zone">
+            <label for="user_answer">Votre réponse :</label>
+            <input type="text" id="user_answer" name="user_answer" placeholder="Entrez votre réponse" required />
+          </div>
+          <button type="submit">Valider</button>
+        </form>
+      </main>
+    </div>
+  </body>
 
 </html>

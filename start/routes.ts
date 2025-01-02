@@ -5,9 +5,9 @@ import { middleware } from './kernel.js'
 
 router.get('/game', [MovieController, 'initializeGame'])
 
-router.get('/', async ({ view }) => {
-  return view.render('home')
-})
+router.get('/', [MovieController, 'showHomePage'])
+
+router.get('/restart', [MovieController, 'restartGame'])
 
 router.post('/movies/check', [MovieController, 'checkAnswer'])
 
