@@ -17,10 +17,10 @@ export default class UserSeeder extends BaseSeeder {
         score: 20,
       },
       {
-        fullName: 'Charlie Durant',
-        email: 'charlie@example.com',
-        password: 'mypassword789',
-        score: 15,
+        fullName: 'lol',
+        email: 'lol@lol.lol',
+        password: 'lol',
+        score: 0,
       },
     ])
   }
