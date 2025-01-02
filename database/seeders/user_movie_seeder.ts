@@ -13,13 +13,17 @@ export default class UserMovieSeeder extends BaseSeeder {
     }
 
     for (const user of users) {
-      const associations = movies.reduce((acc, movie) => {
-        acc[movie.id] = {
-          been_found: false,
-          is_target: false,
-        }
-        return acc
-      }, {})
+      const associations: Record<number, { been_found: boolean; is_target: boolean }> =
+        movies.reduce(
+          (acc, movie) => {
+            acc[movie.id] = {
+              been_found: false,
+              is_target: false,
+            }
+            return acc
+          },
+          {} as Record<number, { been_found: boolean; is_target: boolean }>
+        )
 
       await user.related('userMovies').attach(associations)
     }
