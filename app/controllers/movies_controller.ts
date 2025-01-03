@@ -77,14 +77,6 @@ export default class MovieController {
       }
     }
 
-    const nextMovie = await this.getNextMovie(user, session)
-    if (!nextMovie) {
-      return view.render('end_game', {
-        message: 'Vous avez résolu tous les films ! 🎉',
-        score: user.userData.score,
-      })
-    }
-
     if (user.isAuthenticated) {
       await db
         .from('user_movies')
@@ -94,6 +86,17 @@ export default class MovieController {
           been_found: true,
           is_target: false,
         })
+    }
+
+    const nextMovie = await this.getNextMovie(user, session)
+    if (!nextMovie) {
+      return view.render('end_game', {
+        message: 'Vous avez résolu tous les films ! 🎉',
+        score: user.userData.score,
+      })
+    }
+
+    if (user.isAuthenticated) {
       await db
         .from('user_movies')
         .where('movie_id', nextMovie.id)
