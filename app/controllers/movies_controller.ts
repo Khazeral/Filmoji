@@ -5,6 +5,7 @@ import UsersController from './users_controller.js'
 import { Session } from '@adonisjs/session'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
+import logger from '@adonisjs/core/services/logger'
 
 const USER_NOT_REGISTERED_ID = -1
 const userController = new UsersController()
@@ -49,6 +50,7 @@ export default class MovieController {
   public async checkAnswer({ request, response, session, view }: HttpContext) {
     const user = await userController.getUser(session, request)
     const userAnswer = request.input('user_answer')
+    logger.info(userAnswer)
 
     const movieQuery = user.isAuthenticated
       ? await db
@@ -57,6 +59,8 @@ export default class MovieController {
           .where('user_id', user.userData.id)
           .first()
       : session.get('movieSelected')
+
+    logger.info(movieQuery)
 
     if (!movieQuery) {
       return response.status(404).send({ error: 'Film non trouvé' })
