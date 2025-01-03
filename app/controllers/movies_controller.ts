@@ -66,7 +66,7 @@ export default class MovieController {
       return response.status(404).send({ error: 'Film non trouvé' })
     }
 
-    const movie = await Movie.findOrFail(movieQuery.movie_id)
+    const movie = await Movie.findOrFail(movieQuery.id)
     const distance = getLevenshteinDistance(userAnswer.toLowerCase(), movie.name.toLowerCase())
     const isCorrect = distance <= 3
 
