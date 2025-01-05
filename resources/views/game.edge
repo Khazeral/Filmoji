@@ -122,12 +122,23 @@
   </style>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const inputField = document.querySelector('input[type="text"]');
       const isCorrect = {{ isCorrect }};
+
       if (!isCorrect) {
-        document.querySelector('input[type="text"]').classList.add('incorrect');
+        inputField.classList.add('incorrect');
       }
+
+      inputField.addEventListener('focus', () => {
+        inputField.classList.remove('incorrect');
+      });
+
+      inputField.addEventListener('input', () => {
+        inputField.classList.remove('incorrect');
+      });
     });
   </script>
+
 </head>
 <body>
   <div class="header-buttons">
