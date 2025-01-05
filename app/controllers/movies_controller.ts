@@ -5,7 +5,6 @@ import UsersController from './users_controller.js'
 import { Session } from '@adonisjs/session'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
-import logger from '@adonisjs/core/services/logger'
 
 const USER_NOT_REGISTERED_ID = -1
 const userController = new UsersController()
@@ -44,13 +43,13 @@ export default class MovieController {
       isAuthenticated: user.isAuthenticated,
       movieSelected: movie,
       score: user.userData.score,
+      isCorrect: true,
     })
   }
 
   public async checkAnswer({ request, response, session, view }: HttpContext) {
     const user = await userController.getUser(session, request)
     const userAnswer = request.input('user_answer')
-    logger.info(userAnswer)
 
     const movieQuery = user.isAuthenticated
       ? await db
@@ -59,8 +58,6 @@ export default class MovieController {
           .where('user_id', user.userData.id)
           .first()
       : session.get('movieSelected')
-
-    logger.info(movieQuery)
 
     if (!movieQuery) {
       return response.status(404).send({ error: 'Film non trouvé' })
@@ -75,6 +72,14 @@ export default class MovieController {
         this.updateMoviesFound(user, movie, session)
         this.updateScore(user, session)
       }
+    } else {
+      return view.render('game', {
+        movieSelected: movie,
+        score: user.userData.score,
+        correctAnswer: movie.name,
+        isAuthenticated: user.isAuthenticated,
+        isCorrect: false,
+      })
     }
 
     if (user.isAuthenticated) {
@@ -114,7 +119,7 @@ export default class MovieController {
       score: user.userData.score,
       correctAnswer: nextMovie.name,
       isAuthenticated: user.isAuthenticated,
-      isCorrect: isCorrect,
+      isCorrect: isCorrect ?? true,
     })
   }
 
