@@ -114,6 +114,7 @@ export default class MovieController {
       score: user.userData.score,
       correctAnswer: nextMovie.name,
       isAuthenticated: user.isAuthenticated,
+      isCorrect: isCorrect,
     })
   }
 
